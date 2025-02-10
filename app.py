@@ -19,12 +19,20 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from urllib.parse import quote
 import requests
 import base64
+import gc
 
 app = Flask(__name__)
 CORS(app)
 
 # Initialize logging
 logging.basicConfig(level=logging.DEBUG)
+
+del large_object
+gc.collect()
+
+from huggingface_hub import hf_hub_download
+hf_hub_download("bhadresh-savani/distilbert-base-uncased-emotion", force_download=True)
+
 
 # Emotion labels
 emotion_labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
