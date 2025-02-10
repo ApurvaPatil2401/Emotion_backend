@@ -16,6 +16,7 @@ from music21 import stream, note, midi, chord
 import logging
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+from werkzeug.utils import quote
 import requests
 import base64
 
