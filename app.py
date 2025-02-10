@@ -16,7 +16,7 @@ from music21 import stream, note, midi, chord
 import logging
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from werkzeug.utils import quote
+from urllib.parse import quote
 import requests
 import base64
 
@@ -337,5 +337,5 @@ def generate_music(emotion):
         return None
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, host='0.0.0.0', port=5000 ,threaded=True)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(debug=True, host='0.0.0.0', port=8080 ,threaded=True)
