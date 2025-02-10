@@ -27,7 +27,8 @@ CORS(app)
 # Initialize logging
 logging.basicConfig(level=logging.DEBUG)
 
-del large_object
+if 'large_object' in locals():
+    del large_object
 gc.collect()
 
 from huggingface_hub import hf_hub_download
@@ -346,4 +347,4 @@ def generate_music(emotion):
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
-    app.run(debug=True, host='0.0.0.0', port=8080 ,threaded=True)
+    app.run(debug=True, host='0.0.0.0', port=port ,threaded=True)
