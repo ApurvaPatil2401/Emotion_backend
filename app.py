@@ -32,7 +32,7 @@ if 'large_object' in locals():
 gc.collect()
 
 from huggingface_hub import hf_hub_download
-hf_hub_download("bhadresh-savani/distilbert-base-uncased-emotion", force_download=True)
+hf_hub_download("bhadresh-savani/distilbert-base-uncased-emotion", filename="pytorch_model.bin", force_download=True)
 
 
 # Emotion labels
