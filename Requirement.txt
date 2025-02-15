@@ -10,4 +10,3 @@ music21==9.3.0
 requests==2.32.3
 gunicorn==23.0.0
 scipy==1.10.1  # Smaller version
-huggingface_hub==0.12.0
