@@ -14,6 +14,8 @@ from torch import nn
 import torch.nn.functional as F
 from music21 import stream, note, midi, chord ,tempo , instrument
 import logging
+# Load model directly
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 app = Flask(__name__)
 CORS(app)
@@ -29,7 +31,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the Hugging Face text emotion model
 try:
-    text_emotion_model = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion")
+    tokenizer = AutoTokenizer.from_pretrained("bhadresh-savani/distilbert-base-uncased-emotion")
+    text-emotion-model = AutoModelForSequenceClassification.from_pretrained("bhadresh-savani/distilbert-base-uncased-emotion")
 except Exception as e:
     logging.error(f"Error loading text emotion model: {e}")
     text_emotion_model = None
