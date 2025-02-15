@@ -55,7 +55,7 @@ class FaceEmotionModel(nn.Module):
 
 try:
     face_emotion_model = FaceEmotionModel().to(device)
-    state_dict = torch.load('D:\mscproject\enigmasoundbackend\emotion_model\emotion_model.pth', map_location=device)
+    state_dict = torch.load('emotion_model.pth', map_location=device)
     face_emotion_model.load_state_dict(state_dict)
     face_emotion_model.eval()
 except Exception as e:
@@ -63,7 +63,7 @@ except Exception as e:
     face_emotion_model = None
 
 # Face detection
-face_cascade = cv2.CascadeClassifier('D:\M.Sc.IT\partII\CV practical\Images\haarcascades\haarcascade_frontalface_default.xml')
+face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 if face_cascade.empty():
     logging.error("Error loading face cascade classifier.")
@@ -99,7 +99,7 @@ class AudioEmotionModel(torch.nn.Module):
         return x
 
 # Load the trained model from .pth file
-MODEL_PATH = "D:/mscproject/enigmasoundbackend/emotion_model/audio_emotion_model.pth"  # Replace with actual path to model file
+MODEL_PATH = "audio_emotion_model.pth"  # Replace with actual path to model file
 num_classes = 8  # Number of emotions (as you have from RAVDESS)
 emotion_labels = ['Happy', 'Sad', 'Neutral', 'Fear', 'Surprise', 'Angry', 'Disgust', 'Calm']
 
@@ -407,10 +407,16 @@ def handle_generate_music():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
+from flask import send_from_directory
 @app.route('/static/<path:filename>')
 def serve_static(filename):
-    return send_from_directory('static', filename, mimetype="audio/mpeg")
+    return send_from_directory("static", filename)
+
+# Deployment setup
+@app.route('/')
+def home():
+    return "Enigma Sound API is running on Render!"
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000 ,threaded=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
