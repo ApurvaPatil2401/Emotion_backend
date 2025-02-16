@@ -146,7 +146,7 @@ def detect_emotion_text():
         play_generated = data.get('play_generated', True)
         inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True).to(device)
         with torch.no_grad():
-        output = text_emotion_model(**inputs)
+            output = text_emotion_model(**inputs)
 
 # Get predicted class index
         predicted_class = torch.argmax(output.logits, dim=1).item()
