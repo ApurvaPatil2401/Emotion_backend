@@ -144,11 +144,17 @@ def detect_emotion_text():
         data = request.get_json()
         text = data['text']
         play_generated = data.get('play_generated', True)
+        inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True).to(device)
+        with torch.no_grad():
+        output = text_emotion_model(**inputs)
 
-        inputs = tokenizer(text, return_tensors="pt")
-        prediction = text_emotion_model(**inputs)
-        detected_emotion = prediction[0]['label']
+# Get predicted class index
+        predicted_class = torch.argmax(output.logits, dim=1).item()
 
+# Map index to emotion label
+        detected_emotion = emotion_labels[predicted_class]
+
+        
         if play_generated:
             music_path = generate_music(detected_emotion)
             if music_path and os.path.exists(music_path):
