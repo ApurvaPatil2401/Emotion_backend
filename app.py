@@ -145,7 +145,8 @@ def detect_emotion_text():
         text = data['text']
         play_generated = data.get('play_generated', True)
 
-        prediction = text_emotion_model(text)
+        inputs = tokenizer(text, return_tensors="pt")
+        prediction = text_emotion_model(**inputs)
         detected_emotion = prediction[0]['label']
 
         if play_generated:
