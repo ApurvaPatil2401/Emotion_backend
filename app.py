@@ -377,10 +377,13 @@ def generate_music(detected_emotion):
         # Save as MIDI
         random_number = random.randint(1000, 9999)
         midi_path = f"static/{detected_emotion}_{random_number}.mid"
+        print(f"Generated MIDI Path: {midi_path}")
+
         mf = midi.translate.music21ObjectToMidiFile(s)
         mf.open(midi_path, 'wb')
         mf.write()
         mf.close()
+        
 
         # Convert MIDI to MP3
         mp3_path = f"static/{detected_emotion}_{random_number}.mp3"
