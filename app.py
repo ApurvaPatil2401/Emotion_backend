@@ -158,7 +158,7 @@ def detect_emotion_text():
         if play_generated:
             music_path = generate_music(detected_emotion)
             if music_path and os.path.exists(music_path):
-                music_url = f"http://192.168.0.109:5000/static/{os.path.basename(music_path)}"
+                music_url = f"https://emotion-backend-sq9f.onrender.com/static/{os.path.basename(music_path)}"
                 return jsonify({'emotion': detected_emotion, 'music_url': music_url}), 200
             else:
                 return jsonify({'error': 'Music file not found'}), 404
@@ -186,7 +186,7 @@ def detect_emotion_audio():
         if play_generated:
             music_path = generate_music(detected_emotion)
             if music_path and os.path.exists(music_path):
-                music_url = f"http://192.168.0.109:5000/static/{os.path.basename(music_path)}"
+                music_url = f"https://emotion-backend-sq9f.onrender.com/static/{os.path.basename(music_path)}"
                 return jsonify({'emotion': detected_emotion, 'music_url': music_url}), 200
             else:
                 return jsonify({'error': 'Music file not found'}), 404
@@ -239,7 +239,7 @@ def detect_emotion_face():
         if play_generated:
             music_path = generate_music(detected_emotion)
             if music_path and os.path.exists(music_path):  # Ensure the music file was generated successfully
-                music_url = f"http://192.168.0.109:5000/static/{os.path.basename(music_path)}"
+                music_url = f"https://emotion-backend-sq9f.onrender.com/static/{os.path.basename(music_path)}"
                 return jsonify({'emotion': detected_emotion, 'music_url': music_url}), 200
             else:
                 logging.error("Generated music file not found!")
@@ -413,7 +413,7 @@ def handle_generate_music():
         music_path = generate_music(detected_emotion)
 
         if music_path and os.path.exists(music_path):  # Check if the music was generated successfully
-            music_url = f"http://192.168.0.109:5000/static/{os.path.basename(music_path)}"
+            music_url = f"https://emotion-backend-sq9f.onrender.com/static/{os.path.basename(music_path)}"
             return jsonify({'music_url': music_url}), 200
         else:
             return jsonify({'error': 'Music generation failed'}), 404
