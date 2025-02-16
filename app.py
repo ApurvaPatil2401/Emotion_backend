@@ -14,9 +14,6 @@ from torch import nn
 import torch.nn.functional as F
 from music21 import stream, note, midi, chord ,tempo , instrument
 import logging
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
-
-
 
 app = Flask(__name__)
 CORS(app)
@@ -32,11 +29,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the Hugging Face text emotion model
 try:
-    model_name = "bhadresh-savani/distilbert-base-uncased-emotion"
-
-# Load model in a quantized format
-    text_emotion_model = AutoModelForSequenceClassification.from_pretrained(model_name, torch_dtype=torch.float16)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    text_emotion_model = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion")
 except Exception as e:
     logging.error(f"Error loading text emotion model: {e}")
     text_emotion_model = None
@@ -62,7 +55,7 @@ class FaceEmotionModel(nn.Module):
 
 try:
     face_emotion_model = FaceEmotionModel().to(device)
-    state_dict = torch.load('emotion_model.pth', map_location=device)
+    state_dict = torch.load('D:\mscproject\enigmasoundbackend\emotion_model\emotion_model.pth', map_location=device)
     face_emotion_model.load_state_dict(state_dict)
     face_emotion_model.eval()
 except Exception as e:
@@ -70,7 +63,7 @@ except Exception as e:
     face_emotion_model = None
 
 # Face detection
-face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+face_cascade = cv2.CascadeClassifier('D:\M.Sc.IT\partII\CV practical\Images\haarcascades\haarcascade_frontalface_default.xml')
 
 if face_cascade.empty():
     logging.error("Error loading face cascade classifier.")
@@ -106,7 +99,7 @@ class AudioEmotionModel(torch.nn.Module):
         return x
 
 # Load the trained model from .pth file
-MODEL_PATH = "audio_emotion_model.pth"  # Replace with actual path to model file
+MODEL_PATH = "D:/mscproject/enigmasoundbackend/emotion_model/audio_emotion_model.pth"  # Replace with actual path to model file
 num_classes = 8  # Number of emotions (as you have from RAVDESS)
 emotion_labels = ['Happy', 'Sad', 'Neutral', 'Fear', 'Surprise', 'Angry', 'Disgust', 'Calm']
 
@@ -144,21 +137,14 @@ def detect_emotion_text():
         data = request.get_json()
         text = data['text']
         play_generated = data.get('play_generated', True)
-        inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True).to(device)
-        with torch.no_grad():
-            output = text_emotion_model(**inputs)
 
-# Get predicted class index
-        predicted_class = torch.argmax(output.logits, dim=1).item()
+        prediction = text_emotion_model(text)
+        detected_emotion = prediction[0]['label']
 
-# Map index to emotion label
-        detected_emotion = emotion_labels[predicted_class]
-
-        
         if play_generated:
             music_path = generate_music(detected_emotion)
             if music_path and os.path.exists(music_path):
-                music_url = f"https://emotion-backend-sq9f.onrender.com/static/{os.path.basename(music_path)}"
+                music_url = f"http://192.168.0.109:5000/static/{os.path.basename(music_path)}"
                 return jsonify({'emotion': detected_emotion, 'music_url': music_url}), 200
             else:
                 return jsonify({'error': 'Music file not found'}), 404
@@ -186,7 +172,7 @@ def detect_emotion_audio():
         if play_generated:
             music_path = generate_music(detected_emotion)
             if music_path and os.path.exists(music_path):
-                music_url = f"https://emotion-backend-sq9f.onrender.com/static/{os.path.basename(music_path)}"
+                music_url = f"http://192.168.0.109:5000/static/{os.path.basename(music_path)}"
                 return jsonify({'emotion': detected_emotion, 'music_url': music_url}), 200
             else:
                 return jsonify({'error': 'Music file not found'}), 404
@@ -239,7 +225,7 @@ def detect_emotion_face():
         if play_generated:
             music_path = generate_music(detected_emotion)
             if music_path and os.path.exists(music_path):  # Ensure the music file was generated successfully
-                music_url = f"https://emotion-backend-sq9f.onrender.com/static/{os.path.basename(music_path)}"
+                music_url = f"http://192.168.0.109:5000/static/{os.path.basename(music_path)}"
                 return jsonify({'emotion': detected_emotion, 'music_url': music_url}), 200
             else:
                 logging.error("Generated music file not found!")
@@ -377,13 +363,10 @@ def generate_music(detected_emotion):
         # Save as MIDI
         random_number = random.randint(1000, 9999)
         midi_path = f"static/{detected_emotion}_{random_number}.mid"
-        print(f"Generated MIDI Path: {midi_path}")
-
         mf = midi.translate.music21ObjectToMidiFile(s)
         mf.open(midi_path, 'wb')
         mf.write()
         mf.close()
-        
 
         # Convert MIDI to MP3
         mp3_path = f"static/{detected_emotion}_{random_number}.mp3"
@@ -416,7 +399,7 @@ def handle_generate_music():
         music_path = generate_music(detected_emotion)
 
         if music_path and os.path.exists(music_path):  # Check if the music was generated successfully
-            music_url = f"https://emotion-backend-sq9f.onrender.com/static/{os.path.basename(music_path)}"
+            music_url = f"http://192.168.0.109:5000/static/{os.path.basename(music_path)}"
             return jsonify({'music_url': music_url}), 200
         else:
             return jsonify({'error': 'Music generation failed'}), 404
@@ -424,16 +407,10 @@ def handle_generate_music():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-from flask import send_from_directory
+
 @app.route('/static/<path:filename>')
 def serve_static(filename):
-    return send_from_directory("static", filename)
-
-# Deployment setup
-@app.route('/')
-def home():
-    return "Enigma Sound API is running on Render!"
+    return send_from_directory('static', filename, mimetype="audio/mpeg")
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000 ,threaded=True)
